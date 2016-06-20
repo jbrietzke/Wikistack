@@ -33,9 +33,9 @@ app.get('/', function(req,res, next){
   res.render('index', {});
 });
 
-models.User.sync({})
+models.User.sync({ force: true })
 .then(function () {
-    return models.Page.sync({})
+    return models.Page.sync({ force: true})
 })
 .then(function () {
     app.listen(3001, function () {

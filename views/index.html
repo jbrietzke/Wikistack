@@ -4,6 +4,11 @@
   <h3>Pages</h3>
   <hr>
   <ul class="list-unstyled">
+  {% for page in Pages %}
+  <li>
+  <a href= {{ page.getRoutes }} >{{ page.title }}</a>
     <!-- PLACEHOLDER LIST OF PAGES -->
+  </li>
+  {% endfor %}
   </ul>
 {% endblock %}
