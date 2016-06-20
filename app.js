@@ -3,6 +3,8 @@ var app = express();
 var bodyParser = require('body-parser');
 var swig = require('swig');
 var models = require('./models');
+var wikiRouter = require('./routes/wiki');
+
 
 app.use(bodyParser.urlencoded({extended : false}));
 app.use(bodyParser.json());
@@ -16,11 +18,14 @@ app.engine('html', swig.renderFile);
 // turn of swig's caching
 swig.setDefaults({cache: false});
 
-
+// Logger
 app.use(function(req,res,next){
   console.log(req);
   next();
 });
+
+app.use('/wiki',wikiRouter);
+
 
 app.use(express.static('public'));
 

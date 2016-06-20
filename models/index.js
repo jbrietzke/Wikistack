@@ -3,28 +3,45 @@ var db = new Sequelize('postgres://localhost:5432/wikistack');
 
 var Page = db.define('page', {
     title: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: false
     },
     urlTitle: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        isUrl: true,
+        allowNull: false
     },
     content: {
-        type: Sequelize.TEXT
+        type: Sequelize.TEXT,
+        allowNull: false
     },
     status: {
-        type: Sequelize.ENUM('open', 'closed')
+        type: Sequelize.ENUM('open', 'closed'),
+        defaultValue: 'closed'
     },
     date: {
-        type: Sequelize.DATE
+        type: Sequelize.DATE,
+        isDate: true,
+        defaultValue: Sequelize.NOW
+    }
+},{
+    getterMethods: {
+        getRoutes: function () {
+            var url = ('/wiki/') + this.urlTitle;
+            return url;
+        }
     }
 });
 
 var User = db.define('user', {
     name: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: false
     },
     email: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        isEmail: true,
+        allowNull: false
     }
 });
 
