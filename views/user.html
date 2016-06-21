@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+
+{% block content %}
+<h3>All Articles by {{ User.name }}</h3>
+<h4>Email Address: {{ User.email}}</h4>
+<br>
+<ul>
+  {% for article in Articles %}
+    <li><a href={{ article.getRoutes }}>{{ article.title }}</a></li>
+  {% endfor %}
+</ul>
+{% endblock %}

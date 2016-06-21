@@ -5,8 +5,6 @@ var Page = models.Page;
 var User = models.User;
 
 router.post('/', function(req, res, next) {
-  // STUDENT ASSIGNMENT:
-  // add definitions for `title` and `content`
   var user = User.findOrCreate({
     where: {
       name : req.body.name,
@@ -15,25 +13,16 @@ router.post('/', function(req, res, next) {
   })
   .then(function(values){
     var user = values[0];
-
     var page = Page.build({
     title: req.body.title,
     content: req.body.content
     });
-    // STUDENT ASSIGNMENT:
-  // make sure we only redirect *after* our save is complete!
-  // note: `.save` returns a promise or it can take a callback.
-
     return page.save().then(function(page){
       return page.setAuthor(user);
     });
   })
   .then(function(page){
     res.redirect(page.getRoutes);
-  })
-  // -> after save -> res.redirect('/');
-  .catch(function(err){
-    console.error(err);
   });
 });
 
@@ -43,48 +32,48 @@ router.get('/add', function(req, res, next) {
 
 router.get('/users/:id', function(req, res, next){
   var id = req.params.id;
-  console.log("users/id accessed!!!!!!!------------------", '\n\n' + id);
-  models.Page.findAll({
-    where : {
-      authorId : id
+  var p1 = Page.findAll({
+    where: {
+      authorId: id
     }
-  })
-  .then(function(allArticles){
-    console.log("All articles is ", allArticles);
-    res.render('articlesID', {Articles : allArticles})
-  })
+  });
+  var p2 = User.findOne({
+    where: {
+      id: id
+    }
+  });
+  Promise.all([p1,p2]).then(function(data){
+    res.render('user', {Articles: data[0], User: data[1]});
+  });
 });
 
 router.get('/users', function(req, res, next){
-  models.User.findAll({})
+  User.findAll({})
   .then(function(allUsers){
-    res.render('users', {Users : allUsers})
-  })
+    res.render('users', {Users : allUsers});
+  });
 });
 
 router.get('/:searchedTitle', function(req, res, next) {
   var searchedTitle = req.params.searchedTitle;
-  // Create promise
-  models.Page.findOne({
+  Page.findOne({
     where: {
       urlTitle: searchedTitle
-    }
+    },
+    include: [{model: User, as: 'author'}]
   })
   .then(function(foundPage){
-    console.log("FoundPage Object is", foundPage);
-    res.render('wikipage', {Page: foundPage})
+    console.log("waffles",foundPage);
+    res.render('wikipage', {Page: foundPage});
   })
-  .catch(next);
 });
 
-router.get('/', function(req, res, result){
-  models.Page.findAll({})
+router.get('/', function(req, res, next){
+  Page.findAll({})
   .then(function(allPages){
     res.render('index', {Pages : allPages});
-  })
+  });
 });
-
-
 
 
 
