@@ -1,17 +1,23 @@
 var Sequelize = require('sequelize');
 var db = new Sequelize('postgres://localhost:5432/wikistack');
 
+/* Sequelize.prototype.define =
+  function(Modelname, attributes, options)
+  ONLY THREE ARGUMENTS!
+*/
 var Page = db.define('page', {
     title: {
         type: Sequelize.STRING,
+        /* Can do Sequelize.STRING(10) to
+        limit characters */
         allowNull: false
     },
     urlTitle: {
         type: Sequelize.STRING,
-        isUrl: true,
         allowNull: false
     },
     content: {
+        /* Much larger than STRING, still has character limit */
         type: Sequelize.TEXT,
         allowNull: false
     },
@@ -21,15 +27,42 @@ var Page = db.define('page', {
     },
     date: {
         type: Sequelize.DATE,
-        isDate: true,
         defaultValue: Sequelize.NOW
+    },
+    tags: {
+        type: Sequelize.ARRAY(Sequelize.STRING)
     }
 },{
-    // Virtual method stay within the same object!!
+    // Virtual methods stay within the same object!!
     getterMethods: {
         getRoutes: function () {
             var url = ('/wiki/') + this.urlTitle;
             return url;
+        }
+    },
+    classMethods : {
+        findByTag: function (tagArr) {
+            return Page.findAll({
+                where: {
+                    tags: {
+                        $overlap: tagArr
+                    }
+                }
+            })
+        }
+    }, 
+    instanceMethods : {
+        findSimilar: function() {
+            return Page.findAll({
+                where: {
+                    id : {
+                        $ne: this.id
+                    },
+                    tags: {
+                        $overlap: this.tags
+                    }
+                }
+            })
         }
     },
     hooks: {
@@ -53,10 +86,13 @@ var User = db.define('user', {
     },
     email: {
         type: Sequelize.STRING,
-        isEmail: true,
+        validate: {
+            isEmail: true
+        },
         allowNull: false
     }
 });
+
 
 Page.belongsTo(User, { as: 'author' });
 

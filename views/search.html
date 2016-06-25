@@ -1,0 +1,29 @@
+{% extends "layout.html" %}
+{% block content %}
+  <h3>Search for Posts by Tag</h3>
+  <br>
+  <hr>
+  <form method="GET" action="/wiki/search">
+    <div class="form-group">
+      <label for="searchTerms" class="col-sm-2 control-label">Search Term:</label>
+      <div class="col-sm-2">
+        <input name="searchTerms" type="text" class="form-control"/>
+      </div>
+    </div>
+    <br>
+    <br>
+    <div class="col-sm-offset-2 col-sm-10">
+      <input type = "submit" value = "submit">
+    </div>
+
+  </form>
+  <br>
+  <br>
+  <br>
+  <ul>
+    {% for resultPage in resultPages %}
+    <li><a href={{resultPage.urlTitle}}>{{resultPage.title}}</a></li>
+    {% endfor %}
+  </ul>
+  <br>
+{% endblock %}

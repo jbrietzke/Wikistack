@@ -5,17 +5,28 @@ var Page = models.Page;
 var User = models.User;
 
 router.post('/', function(req, res, next) {
-  var user = User.findOrCreate({
+  // Find or create INSERTS in database, thus no need to save
+  User.findOrCreate({
     where: {
-      name : req.body.name,
-      email : req.body.email
+      name: req.body.name,
+      email: req.body.email
     }
   })
+  // .spread can be used to break up arguments
+  /*
+  .spread(function(foundUser, 2ndArg){
+      title: req.body.title,
+      content: req.body.content,
+      status: req.body.status
+  })
+  */
   .then(function(values){
     var user = values[0];
     var page = Page.build({
-    title: req.body.title,
-    content: req.body.content
+      title: req.body.title,
+      content: req.body.content,
+      status: req.body.status,
+      tags: req.body.tags.split(' ')
     });
     return page.save().then(function(page){
       return page.setAuthor(user);
@@ -23,35 +34,27 @@ router.post('/', function(req, res, next) {
   })
   .then(function(page){
     res.redirect(page.getRoutes);
-  });
+  })
+  .catch(next);
+});
+
+
+router.get('/search', function(req,res,next){
+  var searchTerms = req.query.searchTerms;
+  if(searchTerms){
+    var searchTermsArr = searchTerms.split(' ');
+    console.log("Search terms are: ", searchTermsArr);
+    Page.findByTag(searchTermsArr)
+    .then(function (pages){
+      res.render('search', {resultPages: pages});
+    })
+  }else{
+    res.render('search', {resultPages: null});
+  }
 });
 
 router.get('/add', function(req, res, next) {
   res.render('addpage');
-});
-
-router.get('/users/:id', function(req, res, next){
-  var id = req.params.id;
-  var p1 = Page.findAll({
-    where: {
-      authorId: id
-    }
-  });
-  var p2 = User.findOne({
-    where: {
-      id: id
-    }
-  });
-  Promise.all([p1,p2]).then(function(data){
-    res.render('user', {Articles: data[0], User: data[1]});
-  });
-});
-
-router.get('/users', function(req, res, next){
-  User.findAll({})
-  .then(function(allUsers){
-    res.render('users', {Users : allUsers});
-  });
 });
 
 router.get('/:searchedTitle', function(req, res, next) {
@@ -63,9 +66,14 @@ router.get('/:searchedTitle', function(req, res, next) {
     include: [{model: User, as: 'author'}]
   })
   .then(function(foundPage){
-    console.log("waffles",foundPage);
-    res.render('wikipage', {Page: foundPage});
+    var displayPage = foundPage;
+    displayPage.findSimilar()
+    .then(function(similarPages){
+      res.render('wikipage', {Page: displayPage, 
+                              SimilarPages: similarPages});
+    })
   })
+  .catch(next);
 });
 
 router.get('/', function(req, res, next){
@@ -74,8 +82,6 @@ router.get('/', function(req, res, next){
     res.render('index', {Pages : allPages});
   });
 });
-
-
 
 //Default error handler
 router.use(function(err,req,res,next){

@@ -3,13 +3,32 @@
 {% block content %}
   <h3>{{ Page.title }} <small> (<a href="PLACEHOLDER_URL_TITLE/similar">Similar</a>)</small></h3>
   <br>
-  <h4>by <a href="PLACEHOLDER-AUTHOR-URL">{{ Page.author.name }}</a></h4>
-  <div>Tag List</div>
+  <h4>by <a href="/wiki/users/{{ Page.author.id }}">{{ Page.author.name }}</a></h4>
+  <div id="pageTags">
+    Associated Tags: {{ Page.tags.join(', ') }}
+  </div>
   <hr/>
-  <div><a href="/users/{{ Page.author.id }}">Link to {{ Page.author.name }}'s page</a></div>
+  <div>
+    <a href="/users/{{ Page.author.id }}">
+      Link to {{ Page.author.name }}'s page
+    </a>
+  </div>
   <br>
   <div class="page-body">CONTENT: {{ Page.content }}</div>
   <hr/>
+  <div id="Similar Pages">
+  <h4>Similar Pages by Others:</h4>
+    <ul>
+      {% for similarPage in SimilarPages %}
+      <li>
+        <a href={{similarPage.urlTitle}}>{{similarPage.title}}</a>
+      </li>
+      {% endfor %}
+    </ul>
+  <br>
+  <br>
+  <br>
   <a href="PLACEHOLDER_URL_TITLE/edit" class="btn btn-primary">Edit this page</a>
   <a href="PLACEHOLDER_URL_TITLE/delete" class="btn btn-danger">Delete this page</a>
+
 {% endblock %}	
